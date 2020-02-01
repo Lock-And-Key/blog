@@ -29,18 +29,3 @@ promise.then(data => {
 // 什么时候走成功： then 中返回的是一个普通值 或者是一个成功的 Promise
 // 什么时候走失败：then 中 throw 一个错误 或者是一个失败的 Promise
 
-// .then.then 返回的是一个全新的 Promise，这点与 jQuery很不相同，jQuery 返回的是一个 this。
-
-let p = new Promise((resolve, reject) => {
-    resolve(1)
-})
-
-let p1 = p.then(() => {
-    console.log('p1')
-})
-
-let p2 = p1.then(() => {
-    console.log('p2')
-})
-
-console.log(p1 == p2)

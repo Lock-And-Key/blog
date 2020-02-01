@@ -12,6 +12,48 @@
 const PENDING = 'PENDING'
 const RESOLVED = 'RESOLVED'
 const REJECTED = 'REJECTED'
+
+function resolvePromise(promise2, x, resolve, reject){
+    // 此方法 为了兼容所有的 Promise，保证不同库中间 执行的流程是一样的
+    // 所以此方法要保证尽可能的详细与不出错
+
+    // 针对以下情况
+    // let promise2 = promise.then(() => {
+    //     return promise2
+    // })
+
+    if(promise2 === x) {
+        return reject(new TypeError('Chaining cycle detected for promise #<Promise> ---'))
+    }
+
+    // 2) 判断 x 的类型，如果是对象或者函数，说明他有可能是一个 promise
+    if((typeof x === 'object' && x != null) || typeof x === 'function') {
+        // 有可能是 promise
+        let then = x.then
+        if(typeof then === 'function'){
+            // 到这里，只能认为 x 是一个 promise 了
+            // 这样写的目的是，只能 x.then 的 getter 不再触发, 如以下
+            // let obj = {
+            //     get then() {
+            //         if(a++ === 2){
+            //             throw new Error()
+            //         }
+            //     }
+            // }
+            then.call(x, (y) => {
+                resolve(y)
+            }, (r) => {
+                reject(r)
+            })
+        } else {
+            resolve(x)
+        }
+    } else {
+        // 普通值
+        resolve(x)
+    }
+}
+
 class Promise{
     constructor(executor) {
         console.log('Welcome to My Promise')
@@ -44,21 +86,43 @@ class Promise{
         }
     }
     then(onfulfilled, onrejected) {
-        if(this.status === RESOLVED) {
-            onfulfilled(this.value)
-        }
-        if(this.status === REJECTED) {
-            onrejected(this.reason)
-        }
-        if(this.status === PENDING) {
-            this.onResolvedCallbacks.push(() => {
-                // 切片编程
-                onfulfilled(this.value)
-            })
-            this.onRejectedCallbacks.push(() => {
-                onrejected(this.reason)
-            })
-        }
+        // 为了实现链式调用就创建一个新的 promise 实例
+        let promise2 = new Promise((resolve, reject) => {
+            if(this.status === RESOLVED) {
+                // 执行 then 中的方法，可能返回的是一个普通值，或者是 promise
+                // 我要判断 x 的类型是不是一个 promise，如果 promise 的话，
+                // 需要让这个 promise 执行，并且采用这个 promise 的状态
+                setTimeout(() => {
+                    try {
+                        let x = onfulfilled(this.value)
+                        resolvePromise(promise2, x, resolve, reject)
+                    } catch (e) { // then 方法中监听 throw Error
+                        reject(e)
+                    }    
+                }, 0);
+
+            }
+            if(this.status === REJECTED) {
+                setTimeout(() => {
+                    try {
+                        let x = onrejected(this.reason)
+                        resolvePromise(promise2, x, resolve, reject)
+                    } catch (e) {
+                        reject(e)
+                    }                    
+                }, 0);
+            }
+            if(this.status === PENDING) {
+                this.onResolvedCallbacks.push(() => {
+                    // 切片编程
+                    onfulfilled(this.value)
+                })
+                this.onRejectedCallbacks.push(() => {
+                    onrejected(this.reason)
+                })
+            }
+        })
+        return promise2
     }
 }
 
