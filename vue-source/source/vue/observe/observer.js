@@ -16,6 +16,7 @@ export function defineReactive (data, key, value) {
             if (newValue === value) {
                 return
             }
+            observe(newValue)
             value = newValue
         }
     })

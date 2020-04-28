@@ -41,10 +41,10 @@ methods.forEach((method) => {
             default:
                 break
         }
+        console.log('调用了数组更新的方法')
 
         if (inserted) {
             observeArray(inserted)
         }
-        console.log('调用了数组更新的方法')
     }
 })

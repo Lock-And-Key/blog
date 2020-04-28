@@ -6,13 +6,25 @@ module.exports = {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist')  
     },
-    devtool: 'source-map', //可以产生 source-map
-    resolve: { // 更改解析模块的查找方式
-        modules:  [path.resolve(__dirname, 'source'), path.resolve('node_modules')]
+    module: {
+        rules: [{
+            test: /\.js$/, //Regular expression 
+            exclude: /(node_modules|bower_components)/,//excluded node_modules 
+            use: {
+            loader: "babel-loader", 
+            options: {
+              presets: ["@babel/preset-env"]  //Preset used for env setup
+             }
+            }
+        }]
     },
-    plugins: [
+    devtool: 'source-map', //可以产生 source-map
+    plugin: [
         new HtmlWebpackPlugin({
             template: path.resolve(__dirname, 'public/index.html')
         })
-    ]
+    ],
+    resolve: { // 更改解析模块的查找方式
+        modules:  [path.resolve(__dirname, 'source'), path.resolve('node_modules')]
+    }
 }

@@ -1,11 +1,11 @@
-import Vue from 'vue'
+import Vue from '../source/vue/index'
 let vm = new Vue({
     el: '#app',
     data () {
         return {
             msg: 'hello',
             school: { name: 'zf', age: 10 },
-            arr: [{a: 1}, 2, 3]
+            // arr: [{a: 1}, 2, 3]
         }
     },
     computed: {
