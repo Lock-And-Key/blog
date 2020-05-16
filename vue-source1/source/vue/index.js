@@ -1,6 +1,7 @@
 import { initState } from "./observe";
 import Watcher from "../../../vue-source/source/vue/observe/watcher";
 import { util, compiler } from './util'
+import { popTarget } from "./observe/dep";
 
 function Vue(options) { // vue 中原始用户传入的数据
     this._init(options); //初始化Vue，并且将用户选项传入
@@ -61,6 +62,18 @@ Vue.prototype.$mount = function(){
     // 渲染时通过 watcher 来渲染
     // 渲染 watcher 用于渲染的 watcher
     // vue2.0 组件级别更新 new Vue产生一个组件
+
+    
 }
 
 export default Vue
+
+// 初次渲染的依赖收集，思路整理一下：
+// 1.默认会创建一个渲染 watcher 这个渲染 watcher 默认会被执行
+
+// 2. pushTarget(this)
+// this.getter() 调用当前属性的 get 方法 给当前的属性加了一个 dep dep.addSub(watcher)
+// popTarget()
+
+// 3. 当用户修改了属性的变化后 会调用set方法
+// dep.notify() dep.subs.forEach(watcher => watcher.update())

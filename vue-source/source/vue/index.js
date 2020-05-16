@@ -84,7 +84,8 @@ Vue.prototype.$mount = function () {
         vm._update() // 更新组件
     }
 
-    new Watcher(vm, updateComponent) // 渲染 Watcher
+    new Watcher(vm, updateComponent) // 渲染 Watcher, 默认会调用 updateComponent 这个方法
+    // 数据更改时 页面重新渲染
 }
 
 export default Vue
