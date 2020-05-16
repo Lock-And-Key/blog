@@ -1,5 +1,5 @@
 import { initState } from "./observe";
-import Watcher from "../../../vue-source/source/vue/observe/watcher";
+import Watcher from "./observe/watcher";
 import { util, compiler } from './util'
 import { popTarget } from "./observe/dep";
 
@@ -29,6 +29,7 @@ function query(el){
 
 
 Vue.prototype._update = function () {
+    console.log('更新操作')
     // 利用用户传入的数据更新试图
     let vm = this
     let el = vm.$el
@@ -39,7 +40,6 @@ Vue.prototype._update = function () {
     while (firstChild = el.firstChild) { // 每次拿到第一个元素就将这个元素放入到文档碎片中
         node.appendChild(firstChild) //appendChild 具有移动的功能
     }
-    console.log(node)
     compiler(node, vm)
     el.appendChild(node)
 

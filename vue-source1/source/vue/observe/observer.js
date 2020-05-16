@@ -10,19 +10,16 @@ export function defineReactive (data, key, value) {
     // 相同的属性用的是同一个dep
     let dep = new Dep();
     Object.defineProperty(data, key, {
-        get () {
-            console.log(Dep)
+        // ** 依赖收集
+        get () { // 只要对这个属性进行了取值操作，就会将当前的 watcher 存入进去
             if(Dep.target){
-                debugger;
-                console.log(111)
                 // dep.addSub(Dep.target)
                 dep.depend() // 让 dep可以存放 watcher，让 watcher 也可以存放 dep
             }
-            console.log('11获取数据', value)
             return value
         },
+        // ** 通知依赖的更新
         set (newValue) {
-            console.log('11设置数据')
             if (newValue === value) {
                 return
             }

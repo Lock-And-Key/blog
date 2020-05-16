@@ -16,7 +16,6 @@ class Dep{
         if(Dep.target){ // 为了防止直接调用depend方法
             // Dep.target是一个渲染 watcher
             Dep.target.addDep(this) // 希望可以在 watcher 中互相记忆
-
         }
     }
 }

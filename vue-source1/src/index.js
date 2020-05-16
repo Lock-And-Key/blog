@@ -17,6 +17,12 @@ let vm = new Vue({
     }
 })
 
+setTimeout(() => {
+    vm.msg = 'world'
+    vm.msg = 'hello'
+    vm.msg = 'world'
+    vm.msg = 'xxx'
+}, 1000);
 
 // 什么样的数组【不会】被观测到 arr = [0, 1, 2]
 // 1) arr[0] = 5
@@ -27,4 +33,3 @@ let vm = new Vue({
 // [].push splice unshift shift pop sort reverse vm.$set 内部调用的就是数组的 splice
 
 // vm.msg = vm._data.msg 代理
-console.log('msg', vm.arr[0].a);

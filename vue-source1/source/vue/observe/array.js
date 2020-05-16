@@ -27,7 +27,6 @@ export function observeArray (inserted) { // 要循环数组，依次对数组�
 
 methods.forEach((method) => {
     arrayMethods[method] = function (...args) { // 函数劫持 切片编程
-        console.log('数组变动')
         oldArrayProtoMethods[method].apply(this, args)
         // todo
         let inserted;
