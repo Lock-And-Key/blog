@@ -22,6 +22,7 @@ setTimeout(() => {
     vm.msg = 'hello'
     vm.msg = 'world'
     vm.msg = 'xxx'
+    vm.school.name = 'lxc'
 }, 1000);
 
 // 什么样的数组【不会】被观测到 arr = [0, 1, 2]

@@ -33,10 +33,60 @@ class Watcher{ // 每次产生一个新 Watcher 都要有一个唯一的标识
         }
     }
     update(){
+        queueWatcher(this)
+    }
+    run(){
         this.get()
     }
 }
 
+let has = {}
+let queue = []
+function flushQueue(){
+    // 等待当前这一轮全部更新后，再去让 watcher 依次执行
+    queue.forEach(watcher => watcher.run())
+    has = {}
+    queue = []
+}
+function queueWatcher(watcher){
+    let id = watcher.id
+    if(has[id] === null || has[id] === undefined){
+        has[id] = true
+        queue.push(watcher) // 相同的 watcher 只会存一个到 queue 中
+
+        // 延迟清空队列
+        nextTick(flushQueue)
+    }
+}
+
+let callbacks = []
+function flushCallbacks(){
+    callbacks.forEach(cb => cb())
+}
+function nextTick(cb){ // cb就是flushQueue
+    callbacks.push(cb)
+
+    // 要异步刷新这个 callbacks，获取一个异步的方法
+    //                        微任务                        宏任务
+    // 异步是分执行顺序的，依次是：promise，mutationObserver    setImediate setTimeout
+    let timerFunc = () => {
+        flushCallbacks()
+    }
+    if(Promise){
+        return Promise.resolve().then(timerFunc)
+    }
+    if(MutationObserver){
+        let observe = new MutationObserver(timerFunc)
+        let textNode = document.createTextNode(1)
+        observe.observe(textNode, {characterData: true})
+        textNode.textContent = 2
+        return
+    }
+    if(setImmediate){
+        setImmediate(timerFunc)
+    }
+    setTimeout(timerFunc, 0);
+}
 // 用处
 // 渲染
 // 1.计算属性
