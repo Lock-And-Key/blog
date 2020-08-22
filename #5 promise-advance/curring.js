@@ -52,3 +52,10 @@ console.log(util.isString('hello'))
 
 // 函数柯里化：     范围变小
 // 函数反柯里化：   范围变大
+
+const nums = [1, 3, 4, 5, 6, 7, 8, 10]
+for(let i = 1; i < nums.length; i++){
+    if(nums[i] - nums[i - 1] % 2 === 1){
+        
+    }
+}
