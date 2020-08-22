@@ -6,25 +6,24 @@ function Promise(executor) {
     self.onRejectedCallbacks = [];
     function resolve(value) {
         if (value instanceof Promise) {
-        return value.then(resolve, reject)
+            return value.then(resolve, reject)
         }
         setTimeout(function () { // 异步执行所有的回调函数
-        if (self.status == 'pending') {
-            self.value = value;
-            self.status = 'resolved';
-            self.onResolvedCallbacks.forEach(item => item(value));
-        }
+            if (self.status == 'pending') {
+                self.value = value;
+                self.status = 'resolved';
+                self.onResolvedCallbacks.forEach(item => item(value));
+            }
         });
-
     }
 
     function reject(value) {
         setTimeout(function () {
-        if (self.status == 'pending') {
-            self.value = value;
-            self.status = 'rejected';
-            self.onRejectedCallbacks.forEach(item => item(value));
-        }
+            if (self.status == 'pending') {
+                self.value = value;
+                self.status = 'rejected';
+                self.onRejectedCallbacks.forEach(item => item(value));
+            }
         });
     }
 
@@ -35,35 +34,35 @@ function Promise(executor) {
     }
 }
 function resolvePromise(promise2, x, resolve, reject) {
-if (promise2 === x) {
-    return reject(new TypeError('循环引用'));
-}
-let then, called;
+    if (promise2 === x) {
+        return reject(new TypeError('循环引用'));
+    }
+    let then, called;
 
-if (x != null && ((typeof x == 'object' || typeof x == 'function'))) {
-    try {
-    then = x.then;
-    if (typeof then == 'function') {
-        then.call(x, function (y) {
-        if (called)return;
-        called = true;
-        resolvePromise(promise2, y, resolve, reject);
-        }, function (r) {
-        if (called)return;
-        called = true;
-        reject(r);
-        });
+    if (x != null && ((typeof x == 'object' || typeof x == 'function'))) {
+        try {
+            then = x.then;
+            if (typeof then == 'function') {
+                then.call(x, function (y) {
+                    if (called)return;
+                    called = true;
+                    resolvePromise(promise2, y, resolve, reject);
+                }, function (r) {
+                    if (called)return;
+                    called = true;
+                    reject(r);
+                });
+            } else {
+                resolve(x);
+            }
+        } catch (e) {
+            if (called)return;
+            called = true;
+            reject(e);
+        }
     } else {
         resolve(x);
     }
-    } catch (e) {
-    if (called)return;
-    called = true;
-    reject(e);
-    }
-} else {
-    resolve(x);
-}
 }
 Promise.prototype.then = function (onFulfilled, onRejected) {
     let self = this;
@@ -76,46 +75,45 @@ Promise.prototype.then = function (onFulfilled, onRejected) {
     let promise2;
     if (self.status == 'resolved') {
         promise2 = new Promise(function (resolve, reject) {
-        setTimeout(function () {
-            try {
-            let x = onFulfilled(self.value);
-            resolvePromise(promise2, x, resolve, reject);
-            } catch (e) {
-            reject(e);
-            }
-        });
-
+            setTimeout(function () {
+                try {
+                    let x = onFulfilled(self.value);
+                    resolvePromise(promise2, x, resolve, reject);
+                } catch (e) {
+                    reject(e);
+                }
+            });
         });
     }
     if (self.status == 'rejected') {
         promise2 = new Promise(function (resolve, reject) {
-        setTimeout(function () {
-            try {
-            let x = onRejected(self.value);
-            resolvePromise(promise2, x, resolve, reject);
-            } catch (e) {
-            reject(e);
-            }
-        });
+            setTimeout(function () {
+                try {
+                    let x = onRejected(self.value);
+                    resolvePromise(promise2, x, resolve, reject);
+                } catch (e) {
+                    reject(e);
+                }
+            });
         });
     }
     if (self.status == 'pending') {
         promise2 = new Promise(function (resolve, reject) {
             self.onResolvedCallbacks.push(function (value) {
-            try {
-                let x = onFulfilled(value);
-                resolvePromise(promise2, x, resolve, reject);
-            } catch (e) {
-                reject(e);
-            }
+                try {
+                    let x = onFulfilled(value);
+                    resolvePromise(promise2, x, resolve, reject);
+                } catch (e) {
+                    reject(e);
+                }
             });
             self.onRejectedCallbacks.push(function (value) {
-            try {
-                let x = onRejected(value);
-                resolvePromise(promise2, x, resolve, reject);
-            } catch (e) {
-                reject(e);
-            }
+                try {
+                    let x = onRejected(value);
+                    resolvePromise(promise2, x, resolve, reject);
+                } catch (e) {
+                    reject(e);
+                }
             });
         });
     }
@@ -126,19 +124,27 @@ Promise.prototype.catch = function (onRejected) {
 }
 Promise.all = function (promises) {
     return new Promise(function (resolve, reject) {
-    let result = [];
-    let count = 0;
-    for (let i = 0; i < promises.length; i++) {
-        promises[i].then(function (data) {
-        result[i] = data;
-        if (++count == promises.length) {
-            resolve(result);
+        let result = [];
+        let count = 0;
+        for (let i = 0; i < promises.length; i++) {
+            promises[i].then(function (data) {
+                result[i] = data;
+                if (++count == promises.length) {
+                    resolve(result);
+                }
+            }, function (err) {
+                reject(err);
+            });
         }
-        }, function (err) {
-        reject(err);
-        });
-    }
     });
+}
+
+Promise.race= (promises) => {
+    return new Promise((resolve, reject) => {
+        for (let i = 0; i < promises.length; i++) {
+            promises[i].then(resolve, reject)
+        }
+    })
 }
     
 Promise.deferred = Promise.defer = function () {
@@ -156,5 +162,6 @@ Promise.deferred = Promise.defer = function () {
 try {
     module.exports = Promise
 } catch (e) {
+    
 }
     

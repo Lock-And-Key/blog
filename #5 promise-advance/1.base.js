@@ -25,7 +25,7 @@ let Promise = require('./7.promise')
 // console.log(2);
 let promise = new Promise((resolve, reject) => {
     resolve(new Promise((resolve, reject) => {
-        return 1
+        resolve(1)
     }))
 }).then((aaa) => {
     console.log(aaa)
