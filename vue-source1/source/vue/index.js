@@ -66,6 +66,12 @@ Vue.prototype.$mount = function(){
     
 }
 
+Vue.prototype.$watch = function(expr, handler, opts){
+    // 原理：创建一个watcher
+    let vm = this
+    new Watcher(vm, expr, handler, {user:true, ...opts})
+}
+
 export default Vue
 
 // 初次渲染的依赖收集，思路整理一下：

@@ -46,6 +46,17 @@ function resolvePromise(promise2, x, resolve, reject) {
                 then.call(x, function (y) {
                     if (called)return;
                     called = true;
+                    // 这里会不断递归下去，直到第二个参数是个普通值为止，这时会采用最内层promise的状态。
+                    // eg.
+                    // new Promise((resolve, reject) => {
+                    //     resolve(new Promise((resolve, reject) => {
+                    //         reject(1)
+                    //     }))
+                    // }).then((data) => {
+                    //     console.log('success', data);
+                    // }, (r) => {
+                    //     console.log('fail', r)
+                    // })
                     resolvePromise(promise2, y, resolve, reject);
                 }, function (r) {
                     if (called)return;

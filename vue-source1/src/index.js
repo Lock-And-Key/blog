@@ -6,14 +6,23 @@ let vm = new Vue({
         return {
             msg: 'hello',
             school: { name: 'zf', age: 10 },
-            arr: [{a: 1}, 2, 3]
+            arr: [{a: 1}, 2, 3],
+            firstName: 'feng',
+            lastName: 'zhu'
         }
     },
     computed: {
-
+        fullName(){
+            return this.firstName + this.lastName
+        }
     },
     watch: {
-
+        msg: {
+            handler(newValue, oldValue){
+                console.log(newValue, oldValue)
+            },
+            immediate: true
+        }
     }
 })
 

@@ -17,6 +17,9 @@ export function observe (data) {
     if (typeof data !== 'object' || data === null) {
         return // 不是对象或者是null的情况下，就不需要执行后续逻辑了
     }
+    if (data.__ob__) {
+        return data.__ob__ 
+    }
     return new Observer(data)
 }
 
@@ -46,6 +49,19 @@ function initComputed () {
 
 }
 
-function initWatch () {
-    
+function createWatcher(vm, key, handler){
+    // 内部最终也会使用 $watch 方法
+    return vm.$watch(key, handler)
+}
+
+function initWatch (vm) {
+    let watch = vm.$options.watch
+    for(let key in watch){
+        let userDef = watch[key]
+        let handler = userDef
+        if(userDef.handler){
+            handler = userDef.handler
+        }
+        createWatcher(vm, key, handler, {immediate: userDef.immediate})
+    }
 }
