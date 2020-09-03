@@ -6,6 +6,9 @@ class Watcher{ // 每次产生一个新 Watcher 都要有一个唯一的标识
     // exprOrFn: 用户可能传入的是一个表达式，也可能是一个函数
     // cb: 用户传递的回调函数 vm.$watch('msg', cb)
     // opts: 一些其他参数
+
+    //         vm,  msg,      (newValue, oldValue) => {}, {user: true}
+    //         vm, () => this.firstName + this.lastName,  () => {},  lazy: true
     constructor(vm, exprOrFn, cb, opts = {}){
         this.vm = vm
         this.exprOrFn = exprOrFn
@@ -19,6 +22,8 @@ class Watcher{ // 每次产生一个新 Watcher 都要有一个唯一的标识
         if(opts.user){  // 标识是用户自己写的watcher
             this.user = true
         }
+        this.lazy = opts.lazy // 如果这个值为true，说明这个watcher是计算属性
+        this.dirty = this.lazy 
         this.cb = cb
         this.deps = []
         this.depsId = new Set()
@@ -26,7 +31,7 @@ class Watcher{ // 每次产生一个新 Watcher 都要有一个唯一的标识
         this.id = id++
         this.immediate = opts.immediate
         // 创建watcher的时候，先将表达式对应的值取出来(老值)
-        this.value = this.get(); // 默认创建一个 Watcher 会调用自身的 get 方法
+        this.value = this.lazy ? undefined : this.get(); // 默认创建一个 Watcher 会调用自身的 get 方法
         if(this.immediate){
             this.cb(value, undefined)
         }
@@ -38,6 +43,10 @@ class Watcher{ // 每次产生一个新 Watcher 都要有一个唯一的标识
         popTarget()
         return value
     }
+    evaluate(){
+        this.value = this.get()
+        this.dirty = false
+    }
     addDep(dep){ // 同一个 watcher 不应该重复记录 dep
         let id = dep.id // msg 的dep
         if(!this.depsId.has(id)){
@@ -46,7 +55,19 @@ class Watcher{ // 每次产生一个新 Watcher 都要有一个唯一的标识
             dep.addSub(this)
         }
     }
+    depend(){
+        let i = this.deps.length
+        while(i--){
+            this.deps[i].depend()
+        }
+    }
     update(){
+        if(this.lazy){
+            this.dirty = true
+        }else{
+            queueWatcher(this)
+        }
+
         queueWatcher(this)
     }
     run(){
